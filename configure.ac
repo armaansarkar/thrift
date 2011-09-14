@@ -220,13 +220,14 @@ AX_THRIFT_LIB(ruby, [Ruby], yes)
 have_ruby=no
 if test "$with_ruby" = "yes"; then
   AC_PATH_PROG([RUBY], [ruby])
-  AC_PATH_PROG([RSPEC], [spec])
-  if test "x$RUBY" != "x" ; then
+  AC_PATH_PROG([RAKE], [rake])
+  AC_PATH_PROG([BUNDLER], [bundle])
+  if test "x$RUBY" != "x" -a "x$RAKE" != "x"; then
     have_ruby="yes"
   fi
 fi
 AM_CONDITIONAL(WITH_RUBY, [test "$have_ruby" = "yes"])
-AM_CONDITIONAL(HAVE_RSPEC, [test "x$RSPEC" != "x"])
+AM_CONDITIONAL(HAVE_BUNDLER, [test "x$BUNDLER" != "x"])
 
 AX_THRIFT_LIB(haskell, [Haskell], yes)
 have_haskell=no
@@ -297,6 +298,9 @@ AC_CHECK_HEADERS([stddef.h])
 AC_CHECK_HEADERS([stdlib.h])
 AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([sys/time.h])
+AC_CHECK_HEADERS([sys/un.h])
+AC_CHECK_HEADERS([sys/poll.h])
+AC_CHECK_HEADERS([sys/resource.h])
 AC_CHECK_HEADERS([unistd.h])
 AC_CHECK_HEADERS([libintl.h])
 AC_CHECK_HEADERS([malloc.h])
@@ -312,6 +316,10 @@ dnl of the POSIX Real-Time Extensions.  This seems necessary on Linux,
 dnl and we haven't yet found a system where this is a problem.
 AC_CHECK_LIB(rt, clock_gettime)
 AC_CHECK_LIB(socket, setsockopt)
+
+if test "$have_cpp" = "yes" ; then
+# mingw toolchain used to build "Thrift Compiler for Windows"
+# does not support libcrypto, so we just check if we building the cpp library
 AC_CHECK_LIB(crypto,
     BN_init,
     [AC_CHECK_LIB(ssl,
@@ -322,6 +330,7 @@ AC_CHECK_LIB(crypto,
     )],
     [AC_MSG_ERROR(["Error: libcrypto required."])]
 )
+fi
 
 AC_TYPE_INT16_T
 AC_TYPE_INT32_T
